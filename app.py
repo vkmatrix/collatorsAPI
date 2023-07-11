@@ -32,4 +32,4 @@ def displayOrderID(order_id):
         return jsonify({'error': 'Order not found'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
