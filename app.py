@@ -1,35 +1,29 @@
-from flask import Flask, jsonify,render_template
+from flask import Flask, jsonify,render_template,request
 import json
+import numpy as np
+import pandas as pd
+df=pd.read_csv('static/orders.csv')
+ord_id=list(np.unique(df.orderID.values))
 
-app = Flask(__name__)
+app=Flask(__name__)
 
-# Load the data from orders.json
-with open('orders.json', 'r') as file:
-    orders_data = json.load(file)
 
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/api/hello', methods=['GET'])
-def hello():
-    return {'message': 'Hello, World!'}
-
-@app.route('/api/entire')
-def fulldisplay():
-    return jsonify(orders_data)
-
-@app.route('/api/<int:order_id>', methods=['GET'])
-def displayOrderID(order_id):
-    order = None
-    for item in orders_data:
-        if item.get('orderID') == order_id:
-            order = item
-            break
-    if order:
-        return jsonify(order)
+@app.route('/', methods=['GET'])
+def displayOrderID():
+    res = None
+    order_id = request.args.get('orderID')
+    
+    if order_id is not None:
+        order_id = int(order_id)
+        if order_id in ord_id:
+            q = df[df['orderID'] == order_id]
+            return q.to_json(orient='records')
+        else:
+            res = "Order ID not found."
     else:
-        return jsonify({'error': 'Order not found'})
+        res = "Order ID parameter not provided."
+    
+    return res
 
-if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0')
+if __name__ in '__main__':
+    app.run(debug=True)
